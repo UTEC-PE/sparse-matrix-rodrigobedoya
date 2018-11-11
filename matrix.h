@@ -4,6 +4,7 @@
 #include "node.h"
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 using namespace std;
 
@@ -15,42 +16,19 @@ class Matrix {
         int columns;
         int rows;
 
+        T multiply(vector<T> v1, vector<T> v2)
+        {
+            T result = 0;
+            for(int i = 0; i < v1.size();i++)
+            {
+                result += v1[i] * v2[i];
+            }
+            return result;
+        }
+
+
     public:
-        void test()
-        {
-            
-        }
-
-        T testCon(int x, int y)
-        {
-            if(x > rows || y > columns)
-            {
-                throw out_of_range("out of range");
-            }
-
-            Node<T>* tempCol = hColumns;
-            
-            //getting index
-            while(tempCol->data != y)
-            {
-                tempCol = tempCol->next;
-            }
-
-            Node<T>* current = tempCol;
-            while(current->down != NULL)
-            {
-                current = current->down;
-                if(current->x == x)
-                {
-                    return current->data;
-                }
-                else if(current->x > x)
-                    throw "Couldn't find value";
-            }
-            cout << endl << "ERRORtest: ";
-            return (T)-1;
-        }
-
+        
         Matrix():hRows(NULL),hColumns(NULL),columns(0),rows(0){}
 
         Matrix(int sizeX, int sizeY):
@@ -101,6 +79,10 @@ class Matrix {
             
             if(tempRow->next == NULL)
             {
+                if(data == 0)
+                {
+                    return;
+                }
 
                 if(tempCol->down == NULL)
                 {
@@ -140,11 +122,33 @@ class Matrix {
                 current = current->next;
                 if(current->y == y)
                 {
+                    if(data == 0)
+                    {
+                        while(currentY->down != NULL)
+                        {
+                            prevY = currentY;
+                            currentY = currentY->down;
+
+                            if(currentY->x == x)
+                            {
+                                break;
+                            }
+                        }
+                        prevY->down = currentY->down;
+                        prev->next = current->next;  
+                        delete current;
+                        return;                  
+
+                    }
                     current->data = data;
                     return;
                 }
                 if(current->y > y)
                 {
+                    if(data == 0)
+                    {
+                        return;
+                    }
 
                     Node<T>* new_node = new Node<T>(x,y,data,current,NULL);
                     prev->next = new_node;
@@ -174,6 +178,11 @@ class Matrix {
                 }
             }
             
+
+            if(data == 0)
+            {
+                return;
+            }
             Node<T>* new_node = new Node<T>(x,y,data,NULL,NULL);
             current->next = new_node;
             if(tempCol->down == NULL)
@@ -199,7 +208,6 @@ class Matrix {
 
         T operator()(int x, int y)
         {
-            cout << testCon(x,y) << ",";
             if(x > rows || y > columns)
             {
                 throw out_of_range("out of range");
@@ -222,34 +230,54 @@ class Matrix {
                     return current->data;
                 }
                 else if(current->y > y)
-                    throw "Couldn't find value";
+                    return 0;
             }
-            cout << endl << "ERROR: ";
-            return (T)-1;
+            return 0;
         }
 
 
 
         Matrix<T> operator*(Matrix<T> other)
         {
-            if(rows != other.rows || columns != other.columns)
+            if(columns != other.rows)
             {
-                throw out_of_range("matrixes of different size");
+                throw out_of_range("different rows and columns");
             }
-            /*
-            Matrix result(rows,columns);
-            Node<T>* tempRow = hRows, *current;
+            
+            Matrix result(rows,other.columns);
+            Node<T>* tempRow = result.hRows, *current;
+            
+            Node<T>* tempRowM = hRows;
             for(int i = 0; i < rows;i++)
             {
-                current = tempRow->next;
-                while(current != NULL)
-                {
-                    result.set(current->x,current->y,current->data);
-                    current = current->next;
+                Node<T>* tempColM = other.hColumns;
+                for(int j = 0; j < other.columns;j++)
+                {                    
+                    vector<T> v1(columns,0);
+                    vector<T> v2(columns,0);
+
+                    Node<T> *current1 = tempRowM->next;
+                    while(current1 != NULL)
+                    {
+                        
+                        v1[current1->y] = current1->data;
+                        current1 = current1->next;
+                    }
+
+                    Node<T> *current2 = tempColM->down;
+                    while(current2 != NULL)
+                    {
+                        v2[current2->x] = current2->data;
+                        current2 = current2->down;
+                    }                    
+
+                    result.set(i,j,multiply(v1,v2));
+                    v1.clear();v2.clear();
+                    tempColM = tempColM->next;                    
                 }
-                tempRow = tempRow->down;
+                tempRowM = tempRowM->down;
             }
-            return result;*/
+            return result;
         }
 
 
@@ -270,8 +298,55 @@ class Matrix {
             return result;
         }
 
-        Matrix<T> operator+(Matrix<T> other);
-        Matrix<T> operator-(Matrix<T> other);
+        Matrix<T> operator+(Matrix<T> other)
+        {
+            if(rows != other.rows || columns != other.columns)
+            {
+                throw out_of_range("matrixes of different size");
+            }
+
+            Matrix result(rows,columns);
+            result = other;
+            
+
+            Node<T>* tempRow = hRows, *current;
+            for(int i = 0; i < rows;i++)
+            {
+                current = tempRow->next;
+                while(current != NULL)
+                {
+                    result.set(current->x,current->y,current->data + result(current->x,current->y));
+                    current = current->next;
+                }
+                tempRow = tempRow->down;
+            }
+            return result;
+        }
+
+        Matrix<T> operator-(Matrix<T> other)
+        {
+            if(rows != other.rows || columns != other.columns)
+            {
+                throw out_of_range("matrixes of different size");
+            }
+
+            Matrix result(rows,columns);
+            result = *this;
+            
+
+            Node<T>* tempRow = other.hRows, *current;
+            for(int i = 0; i < other.rows;i++)
+            {
+                current = tempRow->next;
+                while(current != NULL)
+                {
+                    result.set(current->x,current->y,result(current->x,current->y) - current->data);
+                    current = current->next;
+                }
+                tempRow = tempRow->down;
+            }
+            return result;
+        }
 
         Matrix<T> transposed()
         {
@@ -292,11 +367,8 @@ class Matrix {
 
         Matrix<T> operator=(Matrix<T> other)
         {   
-            if(rows != other.rows || columns != other.columns)
-            {
-                throw out_of_range("matrixes of different size");
-            }
-
+            
+            //delete old matrix data
             Node<T>* tempRow = hRows, *current, *temp;
             for(int i = 0; i < rows;i++)
             {
@@ -310,21 +382,62 @@ class Matrix {
                 tempRow = tempRow->down;
             }
             
+            //if matrixes of different size
+            if(rows != other.rows || columns != other.columns)
+            {
+                //delete old indexes
+                Node<T> *current = hRows, *temp;
+                while (current != NULL)
+                {
+                    temp = current;
+                    current = current->down;
+                    delete temp;
+                }
+
+                current = hColumns;
+                while (current != NULL)
+                {
+                    temp = current;
+                    current = current->next;
+                    delete temp;
+                }
+
+                //Create new indexes
+                rows = other.rows;
+                columns = other.columns;
+
+                Node<T>* row = new Node<T>(rows-1);
+                for(int i = 0; i < rows-1;i++)
+                {
+                    Node<T>* temp = row;
+                    row = new Node<T>(rows-2-i,NULL,temp);
+                }
+                hRows = row;
+
+                Node<T>* column = new Node<T>(columns-1);
+                for(int i = 0; i < columns-1;i++)
+                {
+                    Node<T>* temp = column;
+                    column = new Node<T>(columns-2-i,temp);
+                }
+                hColumns = column;
+
+            }
+
+            //copy matrix data
             tempRow = other.hRows;
             for(int i = 0; i < other.rows;i++)
             {
                 current = tempRow->next;
                 while(current != NULL)
                 {
-                    this->set(current->x,current->y,current->data);
+                    set(current->x,current->y,current->data);
                     current = current->next;
                 }
                 tempRow = tempRow->down;
             }
             return *this;
         }
-
-
 
         ~Matrix()
         {

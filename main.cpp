@@ -5,6 +5,8 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
+    
+/*
     Matrix<int> a(5, 5);
 	a.set(0,0,2);
     a.set(1,1,2);
@@ -29,7 +31,7 @@ int main(int argc, char *argv[]) {
     cout << (a*2)(0,1) << endl;
     cout << a.transposed()(1,0) << endl;
 
-    Matrix<int> B(5, 5);
+    Matrix<int> B;
     B = a;
     cout << endl;
     cout << B(0,0) << endl;
@@ -43,6 +45,25 @@ int main(int argc, char *argv[]) {
     cout << B(0,1) << endl;
     cout << (B*2)(0,1) << endl;
     cout << B.transposed()(1,0) << endl;
+*/
 
+/*
+    Matrix<int> m1(2,1);
+    Matrix<int> m2(1,2);
+
+    m1.set(0,0,2);
+    m1.set(1,0,1);
+    m2.set(0,0,3);
+    m2.set(0,1,4);
+
+    cout << m1(0,0) << endl;
+    cout << m1(1,0) << endl;
+    cout << m2(0,0) << m2(0,1) << endl;
+
+    Matrix<int> C(2,2);
+    C = (m1*m2);
+    cout << C(0,0) << "," << C(0,1) << endl;
+    cout << C(1,0) << "," << C(1,1) << endl;
+*/  
     return EXIT_SUCCESS;
 }
