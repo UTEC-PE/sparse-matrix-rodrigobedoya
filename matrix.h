@@ -448,8 +448,40 @@ class Matrix {
         }
 
         ~Matrix()
-        {
+        {  
 
+            /*
+            //delete old matrix data
+            Node<T>* tempRow = hRows, *current, *temp;
+            for(int i = 0; i < rows;i++)
+            {
+                current = tempRow->next;
+                while(current != NULL)
+                {
+                    temp = current;
+                    current = current->next;
+                    delete temp;
+                }
+                tempRow = tempRow->down;
+            }
+
+            //delete old indexes
+            current = hRows;
+            while (current != NULL)
+            {
+                temp = current;
+                current = current->down;
+                delete temp;
+            }
+
+            current = hColumns;
+            while (current != NULL)
+            {
+                temp = current;
+                current = current->next;
+                delete temp;
+            }
+            */
         }
 };
 

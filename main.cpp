@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
 
     Matrix<int> C(2,2);
     C = (m1*m2);
-    C.remove(1,0);
+    
     cout << C(0,0) << "," << C(0,1) << endl;
     cout << C(1,0) << "," << C(1,1) << endl;
       
