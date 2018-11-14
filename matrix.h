@@ -53,6 +53,7 @@ class Matrix {
             
         }
 
+
         void set(int x, int y, T data)
         {
             if(x > rows || y > columns)
@@ -205,6 +206,13 @@ class Matrix {
             currentY->down = new_node;
             return;
         }
+
+
+        void remove(int x, int y)
+        {
+            set(x,y,0);
+        }
+
 
         T operator()(int x, int y)
         {
